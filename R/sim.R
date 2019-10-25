@@ -176,25 +176,19 @@ setMethod("sim", signature(object = "glmmkin"),
           function(object, n.sims=100)
           {
             object.class <- class(object)[[1]]
-            #summ <- summary (object)
-            #coef <- summ$coef[,1:2,drop=FALSE]
-            #dimnames(coef)[[2]] <- c("coef.est","coef.sd")
             beta.hat <- object$coefficients
-            n <- nrow(object$X)
-            k <- length(beta.hat)
-            sigma.hat <- sqrt(sum(object$residuals^2)/(n - k))
             V.beta <- object$cov
-            sigma <- rep (NA, n.sims)
+            k <- length(beta.hat)
             beta <- array (NA, c(n.sims,k))
-            dimnames(beta) <- list (NULL, rownames(beta.hat))
+            dimnames(beta) <- list (NULL, dimnames(beta.hat)[[1]])
             for (s in 1:n.sims){
-              sigma[s] <- sigma.hat*sqrt((n-k)/rchisq(1,n-k))
-              beta[s,] <- MASS::mvrnorm (1, beta.hat, V.beta*sigma[s]^2)
+              beta[s,] <- MASS::mvrnorm (1, beta.hat, V.beta)
             }
             
+            sigma <- rep(0, n.sims)
             ans <- new("sim",
                        coef = beta,
                        sigma = sigma)
-            return (ans)
+            return(ans)
           }
 )
